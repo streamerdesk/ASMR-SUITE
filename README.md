@@ -144,6 +144,14 @@ cmake --build build-native --config Release
 
 See the Spanish section above for the directory tree. Ear-to-ear, Proximity and the Binaural spatializer ship with their own copy of `common/` (the one they were originally built with), so a rebuild can match the binaries already published on streamerdesk.com. Details are in [docs/SOURCES.md](docs/SOURCES.md).
 
+## Política de firma de código / Code signing policy
+
+**Free code signing provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).**
+
+Estamos tramitando la firma gratuita de los instaladores oficiales de Windows con SignPath Foundation. Hasta que se publique la primera versión firmada, esos `.exe` no llevan firma digital. El detalle, los roles del equipo y la política de privacidad están en [CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md).
+
+We are applying for free Windows code signing through SignPath Foundation. Until the first signed release is published, official Windows installers are unsigned. Roles, process and the privacy statement are in [CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md).
+
 ## Licence
 
 **GPL-2.0-or-later**. Free software by Streamerdesk. See [LICENSE](LICENSE).

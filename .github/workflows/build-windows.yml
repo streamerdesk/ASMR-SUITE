@@ -1,7 +1,10 @@
 # Compilacion oficial de los instaladores de Windows a partir de este repositorio publico.
 # Official Windows installer build from this public repository.
 #
-# SignPath Foundation (free OSS code signing) can sign the uploaded artifacts.
+# SignPath Foundation (free OSS code signing) can sign the uploaded artifacts
+# once SIGNPATH_ORGANIZATION_ID (repository variable) and SIGNPATH_API_TOKEN
+# (repository secret) are set after approval. Until then the signing steps are
+# skipped so this workflow stays green.
 # Official downloads remain at https://streamerdesk.com
 name: Build Windows installers
 
@@ -16,6 +19,9 @@ jobs:
     name: Windows x64 plugins and installers
     runs-on: ubuntu-24.04
     timeout-minutes: 90
+    permissions:
+      actions: read
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,6 +40,7 @@ jobs:
         run: bash scripts/build-windows-suite.sh
 
       - name: Upload unsigned Windows packages
+        id: upload-unsigned
         uses: actions/upload-artifact@v4
         with:
           name: windows-installers-unsigned
@@ -42,3 +49,39 @@ jobs:
             dist/*.exe
             dist/*.zip
             dist/*SHA256SUMS*
+
+      # Only the Authenticode-signable installers are sent to SignPath.
+      # The default upload-artifact action wraps them in a ZIP, so the
+      # SignPath artifact configuration should use a zip-file root.
+      - name: Upload unsigned installers for SignPath
+        id: upload-to-sign
+        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installers-to-sign
+          if-no-files-found: error
+          path: dist/*.exe
+
+      - name: Submit SignPath signing request
+        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          # Omit artifact-configuration-slug to use the project default.
+          # After approval you can add:
+          # artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+          github-artifact-id: ${{ steps.upload-to-sign.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 1800
+          output-artifact-directory: ${{ github.workspace }}/dist-signed
+
+      - name: Upload signed Windows installers
+        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installers-signed
+          if-no-files-found: error
+          path: dist-signed/**
