@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# @TITLE@ @VERSION@ - instalador para OBS Studio en Linux (tu usuario, sin sudo)
+# @TITLE@ @VERSION@ - installer for OBS Studio on Linux (your user, no sudo)
+#
+#   ./install.sh            elige efectos y dónde instalar / choose effects and where to install
+#   ./install.sh --yes      todo, sin preguntas / everything, no questions
+#   ./install.sh --flatpak  solo OBS Flatpak / Flatpak OBS only     (--native: solo / only ~/.config)
+#   ./install.sh --text     sin ventanas / no dialogs               (--lang=es | --lang=en)
+#
+# Copia cada efecto a <config>/obs-studio/plugins/<id>/{bin/64bit,data}. NUNCA toca tus presets
+# (<config>/obs-studio/plugin_config/<id>/presets.json). / NEVER touches your presets.
+set -u
+HERE="$(cd "$(dirname "$0")" && pwd)"
+SRC="$HERE/plugins"
+@COMMON@
+if [ "${SHOW_HELP:-0}" = 1 ]; then sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0; fi
+
+if [ "$(uname -m)" != x86_64 ]; then
+	say "$(t "Estos efectos son para Linux x86_64 (PC de 64 bits) y este equipo es $(uname -m)." \
+		"These effects are built for Linux x86_64 (64-bit PC) and this machine is $(uname -m).")"
+	exit 1
+fi
+
+say "\n  $PRODUCT_TITLE @VERSION@ — https://streamerdesk.com\n"
+
+# 1) efectos (todos marcados) / effects (all selected)
+LABELS=(); for i in "${!IDS[@]}"; do LABELS+=("${NAMES[$i]}"); done
+CHOSEN="$(pick "$(t '¿Qué efectos quieres instalar en OBS Studio?' 'Which effects would you like to install in OBS Studio?')" "${LABELS[@]}")" ||
+	{ say "$(t 'Cancelado. No se ha instalado nada.' 'Cancelled. Nothing was installed.')"; exit 0; }
+[ -n "$CHOSEN" ] || { info "$(t 'No has elegido ningún efecto. No se ha instalado nada.' 'No effects chosen. Nothing was installed.')"; exit 0; }
+
+# 2) dónde está OBS / where OBS lives
+BASES=(); BLABELS=()
+if [ "$WANT_NATIVE" = 1 ] || [ "$WANT_FLATPAK" = 1 ]; then
+	[ "$WANT_NATIVE" = 1 ] && { BASES+=("$NATIVE_BASE"); BLABELS+=(x); }
+	[ "$WANT_FLATPAK" = 1 ] && { BASES+=("$FLATPAK_BASE"); BLABELS+=(x); }
+else
+	native_present && { BASES+=("$NATIVE_BASE"); BLABELS+=("$(t 'OBS Studio normal (paquete de tu distro / PPA)' 'Regular OBS Studio (distro package / PPA)') — ${NATIVE_BASE/#$HOME/\~}"); }
+	flatpak_present && { BASES+=("$FLATPAK_BASE"); BLABELS+=("$(t 'OBS Studio Flatpak (Flathub)' 'OBS Studio Flatpak (Flathub)') — ${FLATPAK_BASE/#$HOME/\~}"); }
+	if [ ${#BASES[@]} -eq 0 ]; then
+		# no encontramos OBS: lo dejamos listo para el OBS normal / OBS not found: prepare the regular one
+		BASES=("$NATIVE_BASE"); BLABELS=(x)
+		say "$(t 'No he encontrado OBS Studio todavía; instalo en la ruta normal para cuando lo abras.' \
+			"I couldn't find OBS Studio yet; installing to the regular location for when you open it.")"
+	elif [ ${#BASES[@]} -gt 1 ]; then
+		sel="$(pick "$(t 'He encontrado OBS Studio en dos sitios. ¿En cuál lo instalo?' 'I found OBS Studio in two places. Where should I install?')" "${BLABELS[@]}")" ||
+			{ say "$(t 'Cancelado. No se ha instalado nada.' 'Cancelled. Nothing was installed.')"; exit 0; }
+		nb=(); for i in $sel; do nb+=("${BASES[$i]}"); done
+		BASES=("${nb[@]+"${nb[@]}"}")
+		[ ${#BASES[@]} -gt 0 ] || { info "$(t 'No se ha instalado nada.' 'Nothing was installed.')"; exit 0; }
+	fi
+fi
+
+# 3) OBS abierto / OBS running
+if obs_running && [ "$YES" = 0 ]; then
+	ask_yes "$(t 'OBS Studio está abierto. Ciérralo para que cargue los efectos nuevos.\n¿Ya lo has cerrado y seguimos?' \
+		'OBS Studio is running. Please quit it so it picks up the new effects.\nHave you quit it and shall we continue?')" ||
+		{ say "$(t 'No se ha instalado nada.' 'Nothing was installed.')"; exit 0; }
+fi
+
+# 4) instalar / install
+DONE=""; FAIL=""; WHERE=""
+for base in "${BASES[@]}"; do
+	mkdir -p "$base/plugins" || { FAIL="$FAIL\n  • ${base/#$HOME/\~}"; continue; }
+	n_ok=0
+	for i in $CHOSEN; do
+		id="${IDS[$i]}"
+		rm -rf "${base:?}/plugins/${id:?}"
+		if cp -R "$SRC/$id" "$base/plugins/" && [ -f "$base/plugins/$id/bin/64bit/$id.so" ]; then
+			chmod 755 "$base/plugins/$id/bin/64bit/$id.so"
+			n_ok=$((n_ok + 1))
+		else
+			FAIL="$FAIL\n  • ${NAMES[$i]} (${base/#$HOME/\~})"
+		fi
+	done
+	[ "$n_ok" -gt 0 ] && WHERE="$WHERE\n  📁 ${base/#$HOME/\~}/plugins"
+done
+for i in $CHOSEN; do
+	case "$FAIL" in *"${NAMES[$i]} ("*) ;; *) [ -n "$WHERE" ] && DONE="$DONE\n  • ${NAMES[$i]}" ;; esac
+done
+
+MSG=""
+[ -n "$DONE" ] && MSG="$(t '¡Listo! Efectos instalados:' 'All done! Installed effects:')$DONE\n\n$(t 'En:' 'In:')$WHERE\n\n$(t \
+	'Abre (o reinicia) OBS Studio y añádelos con clic derecho en tu micrófono > Filtros > +.\nTus presets se conservan. ¡A disfrutar! 🎧' \
+	'Open (or restart) OBS Studio and add them via right-click on your mic > Filters > +.\nYour presets are kept. Enjoy! 🎧')"
+[ -n "$FAIL" ] && MSG="$MSG\n\n$(t 'No se pudo instalar:' 'Could not install:')$FAIL"
+[ -n "$MSG" ] || MSG="$(t 'No se ha instalado nada.' 'Nothing was installed.')"
+info "$MSG"
+[ -z "$FAIL" ]

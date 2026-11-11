@@ -1,0 +1,36 @@
+![Streamerdesk ASMR](banner.jpg)
+
+# @DISPLAY@ @VERSION@ — Linux
+
+**ES** · Filtro de audio para **OBS Studio 28 o posterior** en **Linux x86_64** (Ubuntu, Linux Mint, Pop!_OS, Debian, Fedora, Arch, Manjaro, openSUSE…), también para **OBS Flatpak**. Gratis y de código abierto, hecho con cariño por Streamerdesk — https://streamerdesk.com
+
+**EN** · Audio filter for **OBS Studio 28 or later** on **Linux x86_64** (Ubuntu, Linux Mint, Pop!_OS, Debian, Fedora, Arch, Manjaro, openSUSE…), **Flatpak OBS** included. Free and open source, lovingly made by Streamerdesk — https://streamerdesk.com
+
+## Instalar (español)
+1. Cierra OBS Studio y descomprime este archivo.
+2. Abre una terminal en la carpeta y ejecuta **`./install.sh`** (o doble clic > «Ejecutar en terminal»). No necesita `sudo`.
+   Si tienes OBS normal y también el de Flatpak, te pregunta en cuál instalarlo.
+3. Abre OBS, clic derecho en tu micrófono > **Filtros** > **+** > **@NAME_ES@**.
+
+Dónde queda / Where it goes:
+- OBS normal: `~/.config/obs-studio/plugins/@ID@/` (`bin/64bit/@ID@.so` + `data/`)
+- OBS Flatpak: `~/.var/app/com.obsproject.Studio/config/obs-studio/plugins/@ID@/`
+
+Instalación manual: copia la carpeta `plugins/@ID@` dentro de una de esas carpetas `plugins/`.
+Tus presets de usuario viven en `…/obs-studio/plugin_config/@ID@/presets.json` y se conservan al actualizar o desinstalar.
+Desinstalar: **`./uninstall.sh`** (tus presets se quedan).
+
+## Install (English)
+1. Quit OBS Studio and extract this archive.
+2. Open a terminal in the folder and run **`./install.sh`** (or double-click > "Run in terminal"). No `sudo` needed.
+   If you have both regular OBS and Flatpak OBS, it asks which one to use.
+3. Open OBS, right-click your microphone > **Filters** > **+** > **@NAME_EN@** (shown with its Spanish/English label).
+
+Manual install: copy the `plugins/@ID@` folder into one of the `plugins/` folders above.
+Your user presets live in `…/obs-studio/plugin_config/@ID@/presets.json` and are kept when updating or uninstalling.
+Uninstall: **`./uninstall.sh`** (your presets stay).
+
+@NOTES@
+
+---
+Licencia / License: GPL-2.0-or-later (LICENSE.txt). ¿Quieres los seis efectos? Descarga la *Streamerdesk ASMR Suite* para Linux. / Want all six effects? Get the *Streamerdesk ASMR Suite* for Linux.

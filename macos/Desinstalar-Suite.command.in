@@ -1,0 +1,32 @@
+#!/bin/bash
+# Streamerdesk ASMR Suite @SUITE_VERSION@ - desinstalador / uninstaller (macOS)
+# Borra solo los .plugin elegidos. Tus presets (plugin_config) se conservan.
+# Removes only the chosen .plugin bundles. Your presets (plugin_config) are kept.
+DEST="$HOME/Library/Application Support/obs-studio/plugins"
+IDS=@IDS@
+NAMES_ES=@NAMES_ES@
+NAMES_EN=@NAMES_EN@
+ES=0
+case "$(defaults read -g AppleLanguages 2>/dev/null | sed -n '2p' | tr -d ' "' )$(defaults read -g AppleLocale 2>/dev/null)" in es*) ES=1 ;; esac
+if [ $ES = 1 ]; then NAMES=("${NAMES_ES[@]}"); T_PROMPT="¿Qué efectos quieres desinstalar? (tus presets se conservan)"; T_OK="Desinstalar"; T_CANCEL="Cancelar"; T_NONE="No hay efectos de Streamerdesk ASMR instalados."; T_DONE="Desinstalado:"
+else NAMES=("${NAMES_EN[@]}"); T_PROMPT="Which effects would you like to uninstall? (your presets are kept)"; T_OK="Uninstall"; T_CANCEL="Cancel"; T_NONE="No Streamerdesk ASMR effects are installed."; T_DONE="Uninstalled:"; fi
+INST=(); INAMES=()
+for i in "${!IDS[@]}"; do [ -d "$DEST/${IDS[$i]}.plugin" ] && { INST+=("${IDS[$i]}"); INAMES+=("${NAMES[$i]}"); }; done
+if [ ${#INST[@]} -eq 0 ]; then echo "$T_NONE"; osascript -e "display dialog \"$T_NONE\" buttons {\"OK\"}" >/dev/null 2>&1; exit 0; fi
+s=""; for n in "${INAMES[@]}"; do s="$s\"$n\", "; done; LIST="{${s%, }}"
+CHOSEN="$(osascript 2>/dev/null <<APPLESCRIPT
+set theList to $LIST
+set picked to choose from list theList with title "Streamerdesk ASMR Suite" with prompt "$T_PROMPT" default items theList OK button name "$T_OK" cancel button name "$T_CANCEL" with multiple selections allowed
+if picked is false then return "__CANCEL__"
+set AppleScript's text item delimiters to linefeed
+return picked as text
+APPLESCRIPT
+)" || CHOSEN="__CANCEL__"
+[ "$CHOSEN" = "__CANCEL__" ] && exit 0
+OUT=""
+for i in "${!INST[@]}"; do
+	if printf '%s\n' "$CHOSEN" | grep -Fxq -- "${INAMES[$i]}"; then rm -rf "$DEST/${INST[$i]}.plugin"; OUT="$OUT• ${INAMES[$i]}\n"; fi
+done
+printf "$T_DONE\n$OUT"
+osascript -e "display dialog \"$(printf "$T_DONE\n\n$OUT")\" with title \"Streamerdesk ASMR Suite\" buttons {\"OK\"}" >/dev/null 2>&1
+exit 0

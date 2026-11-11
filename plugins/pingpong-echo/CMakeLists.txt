@@ -1,0 +1,11 @@
+sd_add_obs_plugin(streamerdesk-asmr-pingpong-echo 1.0.1 src/plugin-main.c src/pingpong_dsp.c)
+target_include_directories(streamerdesk-asmr-pingpong-echo PRIVATE src)
+
+if(SD_BUILD_TESTS)
+  add_executable(test_pingpong test/test_pingpong.c src/pingpong_dsp.c)
+  target_link_libraries(test_pingpong PRIVATE sd_common)
+  if(NOT MSVC)
+    target_link_libraries(test_pingpong PRIVATE m)
+  endif()
+  add_test(NAME pingpong_dsp COMMAND test_pingpong)
+endif()

@@ -1,0 +1,11 @@
+sd_add_obs_plugin(streamerdesk-asmr-proximity 1.0.0 src/plugin-main.c src/proximity_dsp.c)
+target_include_directories(streamerdesk-asmr-proximity PRIVATE src)
+
+if(SD_BUILD_TESTS)
+  add_executable(test_proximity test/test_proximity.c src/proximity_dsp.c)
+  target_include_directories(test_proximity PRIVATE src common/dsp)
+  if(NOT MSVC)
+    target_link_libraries(test_proximity PRIVATE m)
+  endif()
+  add_test(NAME proximity_dsp COMMAND test_proximity)
+endif()

@@ -1,0 +1,88 @@
+#!/bin/bash
+# Streamerdesk ASMR Suite @SUITE_VERSION@ - instalador para OBS Studio en macOS (doble clic)
+# Streamerdesk ASMR Suite @SUITE_VERSION@ - installer for OBS Studio on macOS (double-click)
+#
+# Copia los efectos elegidos a ~/Library/Application Support/obs-studio/plugins, quita la cuarentena
+# de Gatekeeper y NUNCA toca tus presets (~/Library/Application Support/obs-studio/plugin_config).
+# Copies the chosen effects, removes the Gatekeeper quarantine and NEVER touches your presets.
+HERE="$(cd "$(dirname "$0")" && pwd)"
+SRC="$HERE/Plugins"
+DEST="$HOME/Library/Application Support/obs-studio/plugins"
+IDS=@IDS@
+NAMES_ES=@NAMES_ES@
+NAMES_EN=@NAMES_EN@
+
+ES=0
+case "$(defaults read -g AppleLanguages 2>/dev/null | sed -n '2p' | tr -d ' "' )$(defaults read -g AppleLocale 2>/dev/null)" in
+	es*) ES=1 ;;
+esac
+if [ $ES = 1 ]; then
+	NAMES=("${NAMES_ES[@]}")
+	T_TITLE="Streamerdesk ASMR Suite"
+	T_PROMPT="¿Qué efectos quieres instalar en OBS Studio? (Cmd-clic para quitar o añadir)"
+	T_OK="Instalar"; T_CANCEL="Cancelar"
+	T_OBS="OBS Studio está abierto. Ciérralo antes de continuar para que cargue los efectos nuevos."
+	T_CONT="Ya lo he cerrado"
+	T_DONE="¡Listo! Efectos instalados:"
+	T_RESTART="Abre (o reinicia) OBS Studio y añádelos con clic derecho en tu micrófono > Filtros > +. Tus presets se conservan."
+	T_NONE="No se ha instalado nada."
+	T_ALL="¿Instalar todos los efectos? [S/n] "
+else
+	NAMES=("${NAMES_EN[@]}")
+	T_TITLE="Streamerdesk ASMR Suite"
+	T_PROMPT="Which effects would you like to install in OBS Studio? (Cmd-click to add or remove)"
+	T_OK="Install"; T_CANCEL="Cancel"
+	T_OBS="OBS Studio is open. Please quit it before continuing so it loads the new effects."
+	T_CONT="I've quit it"
+	T_DONE="All done! Installed effects:"
+	T_RESTART="Open (or restart) OBS Studio and add them via right-click on your mic > Filters > +. Your presets are kept."
+	T_NONE="Nothing was installed."
+	T_ALL="Install all effects? [Y/n] "
+fi
+
+as_list() { local s="" n; for n in "$@"; do s="$s\"${n//\"/\\\"}\", "; done; echo "{${s%, }}"; }
+LIST="$(as_list "${NAMES[@]}")"
+
+# 1) elegir efectos (todos marcados por defecto) / choose effects (all selected by default)
+CHOSEN="$(osascript 2>/dev/null <<APPLESCRIPT
+set theList to $LIST
+set picked to choose from list theList with title "$T_TITLE" with prompt "$T_PROMPT" default items theList OK button name "$T_OK" cancel button name "$T_CANCEL" with multiple selections allowed
+if picked is false then return "__CANCEL__"
+set AppleScript's text item delimiters to linefeed
+return picked as text
+APPLESCRIPT
+)"
+RC=$?
+if [ $RC -ne 0 ] || [ -z "$CHOSEN" ]; then
+	# sin interfaz grafica: preguntar en el Terminal / no GUI: ask in Terminal
+	read -r -p "$T_ALL" ans
+	case "$ans" in [nN]*) CHOSEN="__CANCEL__" ;; *) CHOSEN="$(printf '%s\n' "${NAMES[@]}")" ;; esac
+fi
+if [ "$CHOSEN" = "__CANCEL__" ]; then
+	echo "$T_NONE"; exit 0
+fi
+
+# 2) avisar si OBS esta abierto / warn if OBS is running
+if pgrep -xq OBS || pgrep -xq obs; then
+	osascript -e "display dialog \"$T_OBS\" with title \"$T_TITLE\" buttons {\"$T_CANCEL\", \"$T_CONT\"} default button 2 with icon caution" >/dev/null 2>&1 || {
+		echo "$T_NONE"; exit 0; }
+fi
+
+# 3) instalar / install
+mkdir -p "$DEST"
+DONE=""
+for i in "${!IDS[@]}"; do
+	if printf '%s\n' "$CHOSEN" | grep -Fxq -- "${NAMES[$i]}"; then
+		id="${IDS[$i]}"
+		rm -rf "$DEST/$id.plugin"
+		cp -R "$SRC/$id.plugin" "$DEST/" &&
+			xattr -dr com.apple.quarantine "$DEST/$id.plugin" 2>/dev/null
+		[ -d "$DEST/$id.plugin" ] && DONE="$DONE• ${NAMES[$i]}\n"
+	fi
+done
+
+if [ -z "$DONE" ]; then MSG="$T_NONE"; else MSG="$T_DONE\n\n$DONE\n$T_RESTART"; fi
+echo ""; printf "$MSG\n"; echo "($DEST)"; echo ""
+osascript -e "display dialog \"$(printf "$MSG")\" with title \"$T_TITLE\" buttons {\"OK\"} default button 1" >/dev/null 2>&1 ||
+	read -n 1 -s -r -p "Pulsa una tecla para cerrar / Press any key to close"
+exit 0

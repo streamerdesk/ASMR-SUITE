@@ -1,0 +1,5 @@
+## Notas / Notes
+- **Requisitos / Requirements:** PC de 64 bits (x86_64) con glibc 2.28 o posterior: Ubuntu 20.04+, Linux Mint 20+, Pop!_OS 20.04+, Debian 10+, Fedora 29+, Arch/Manjaro, openSUSE Leap 15.3+/Tumbleweed. OBS Studio 28 o posterior. / 64-bit PC (x86_64) with glibc 2.28 or later (same distros as above). OBS Studio 28 or later.
+- **Flatpak:** OBS de Flathub carga los plugins de `~/.var/app/com.obsproject.Studio/config/obs-studio/plugins/`. Estos efectos no dependen de ninguna librería externa, así que funcionan dentro del sandbox sin permisos extra. / Flathub OBS loads plugins from that folder. These effects need no external libraries, so they work inside the sandbox with no extra permissions.
+- **Snap:** el paquete Snap de OBS no es oficial y no admite plugins de usuario de forma fiable; te recomendamos OBS de tu distro, del PPA oficial o de Flathub. / The OBS Snap is unofficial and does not reliably load user plugins; we recommend OBS from your distro, the official PPA or Flathub.
+- **ARM (Raspberry Pi, etc.):** de momento solo x86_64. / x86_64 only for now.

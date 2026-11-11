@@ -1,0 +1,107 @@
+# ---------------------------------------------------------------- comun / shared
+PRODUCT_TITLE=@TITLE@
+IDS=@IDS@
+NAMES_ES=@NAMES_ES@
+NAMES_EN=@NAMES_EN@
+FLATPAK_APP="com.obsproject.Studio"
+NATIVE_BASE="${XDG_CONFIG_HOME:-$HOME/.config}/obs-studio"
+FLATPAK_BASE="$HOME/.var/app/$FLATPAK_APP/config/obs-studio"
+
+YES=0; FORCE_UI=""; WANT_NATIVE=0; WANT_FLATPAK=0
+ES=0
+case "${LC_ALL:-${LC_MESSAGES:-${LANG:-}}}" in es*|ES*) ES=1 ;; esac
+for a in "$@"; do
+	case "$a" in
+	-y|--yes|--all) YES=1 ;;
+	--text) FORCE_UI=text ;;
+	--native) WANT_NATIVE=1 ;;
+	--flatpak) WANT_FLATPAK=1 ;;
+	--lang=es) ES=1 ;;
+	--lang=en) ES=0 ;;
+	-h|--help) SHOW_HELP=1 ;;
+	*) echo "?? $a (--help)"; exit 2 ;;
+	esac
+done
+if [ "$ES" = 1 ]; then NAMES=("${NAMES_ES[@]}"); else NAMES=("${NAMES_EN[@]}"); fi
+
+t() { if [ "$ES" = 1 ]; then printf '%s' "$1"; else printf '%s' "$2"; fi; }
+
+# Interfaz: whiptail en terminal, zenity si se abrio sin terminal, si no preguntas de texto.
+# UI: whiptail in a terminal, zenity when started without a terminal, otherwise plain text prompts.
+UI=text
+if [ -z "$FORCE_UI" ] && [ "$YES" = 0 ]; then
+	if [ -t 0 ] && [ -t 1 ] && command -v whiptail >/dev/null 2>&1; then UI=whiptail
+	elif ! [ -t 0 ] && { [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; } && command -v zenity >/dev/null 2>&1; then UI=zenity
+	fi
+fi
+[ -t 0 ] || [ "$UI" = zenity ] || YES=1   # sin terminal ni ventanas: valores por defecto / no way to ask: defaults
+
+say() { printf '%b\n' "$*"; }
+
+# info "titulo" "texto"
+info() {
+	case "$UI" in
+	whiptail) whiptail --title "$PRODUCT_TITLE" --msgbox "$(printf '%b' "$1")" 20 74 ;;
+	zenity) zenity --info --title="$PRODUCT_TITLE" --width=560 --text="$(printf '%b' "$1")" 2>/dev/null ;;
+	esac
+	say "$1"
+}
+
+# ask_yes "pregunta" -> 0 si/yes (por defecto si / default yes)
+ask_yes() {
+	[ "$YES" = 1 ] && return 0
+	case "$UI" in
+	whiptail) whiptail --title "$PRODUCT_TITLE" --yesno "$(printf '%b' "$1")" 14 74 \
+		--yes-button "$(t 'Sí' 'Yes')" --no-button "$(t 'No' 'No')" ;;
+	zenity) zenity --question --title="$PRODUCT_TITLE" --width=560 --text="$(printf '%b' "$1")" \
+		--ok-label="$(t 'Sí' 'Yes')" --cancel-label="$(t 'No' 'No')" 2>/dev/null ;;
+	*) local r; printf '%b ' "$1 $(t '[S/n]' '[Y/n]')"; read -r r || r=""
+	   case "$r" in [nN]*) return 1 ;; *) return 0 ;; esac ;;
+	esac
+}
+
+# pick "pregunta" etiqueta1 etiqueta2 ... -> imprime los indices elegidos (todos marcados por defecto)
+# pick "question" label1 label2 ... -> prints chosen indexes (all selected by default); exit 1 = cancel
+pick() {
+	local q="$1"; shift
+	local labels=("$@") n=$# i out
+	if [ "$YES" = 1 ] || [ "$n" -le 1 ]; then seq 0 $((n - 1)); return 0; fi
+	case "$UI" in
+	whiptail)
+		local args=()
+		for i in "${!labels[@]}"; do args+=("$i" "${labels[$i]}" ON); done
+		out="$(whiptail --title "$PRODUCT_TITLE" --separate-output \
+			--ok-button "$(t 'Aceptar' 'OK')" --cancel-button "$(t 'Cancelar' 'Cancel')" \
+			--checklist "$(printf '%b' "$q")\n\n$(t '(Espacio marca o desmarca, Intro acepta)' '(Space toggles, Enter confirms)')" \
+			20 74 $((n < 8 ? n : 8)) "${args[@]}" 3>&1 1>&2 2>&3)" || return 1
+		printf '%s\n' "$out" ;;
+	zenity)
+		local args=()
+		for i in "${!labels[@]}"; do args+=(TRUE "$i" "${labels[$i]}"); done
+		out="$(zenity --list --checklist --title="$PRODUCT_TITLE" --text="$(printf '%b' "$q")" --width=640 --height=$((230 + 44 * n)) \
+			--column="" --column="#" --column="$(t 'Elige' 'Choose')" --hide-column=2 --print-column=2 --separator=$'\n' \
+			--ok-label="$(t 'Aceptar' 'OK')" --cancel-label="$(t 'Cancelar' 'Cancel')" "${args[@]}" 2>/dev/null)" || return 1
+		printf '%s\n' "$out" ;;
+	*)
+		# las preguntas van a stderr: stdout solo lleva los indices elegidos / prompts go to stderr
+		say "$q" >&2
+		for i in "${!labels[@]}"; do say "  [x] $((i + 1)). ${labels[$i]}" >&2; done
+		local r; printf '%s ' "$(t '¿Todos? [S/n]' 'All of them? [Y/n]')" >&2; read -r r || r=""
+		case "$r" in
+		[nN]*) for i in "${!labels[@]}"; do
+				printf '%s ' "   ${labels[$i]}? $(t '[S/n]' '[Y/n]')" >&2; read -r r || r=""
+				case "$r" in [nN]*) ;; *) echo "$i" ;; esac
+			done ;;
+		*) seq 0 $((n - 1)) ;;
+		esac ;;
+	esac
+}
+
+flatpak_present() {
+	[ -d "$HOME/.var/app/$FLATPAK_APP" ] && return 0
+	command -v flatpak >/dev/null 2>&1 && flatpak info "$FLATPAK_APP" >/dev/null 2>&1
+}
+native_present() {
+	command -v obs >/dev/null 2>&1 || [ -d "$NATIVE_BASE" ]
+}
+obs_running() { pgrep -x obs >/dev/null 2>&1; }

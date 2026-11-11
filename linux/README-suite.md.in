@@ -1,0 +1,44 @@
+![Streamerdesk ASMR Suite](banner.jpg)
+
+# Streamerdesk ASMR Suite @SUITE_VERSION@ — Linux
+
+**ES** · Seis filtros de audio para **OBS Studio 28 o posterior** pensados para ASMR, para **Linux x86_64** (Ubuntu, Linux Mint, Pop!_OS, Debian, Fedora, Arch, Manjaro, openSUSE…), también para **OBS Flatpak**. Gratis y de código abierto, hecho con cariño por Streamerdesk — https://streamerdesk.com
+
+**EN** · Six audio filters for **OBS Studio 28 or later**, made for ASMR, for **Linux x86_64** (Ubuntu, Linux Mint, Pop!_OS, Debian, Fedora, Arch, Manjaro, openSUSE…), **Flatpak OBS** included. Free and open source, lovingly made by Streamerdesk — https://streamerdesk.com
+
+| Efecto / Effect | Versión | Carpeta / Folder |
+|---|---|---|
+@TABLE@
+
+## Instalar (español)
+1. Cierra OBS Studio y descomprime este archivo.
+2. Abre una terminal en la carpeta y ejecuta **`./install.sh`** (o doble clic > «Ejecutar en terminal»). No necesita `sudo`.
+3. Marca los efectos que quieras (**vienen todos marcados**; con la barra espaciadora quitas o pones) y acepta.
+   Si tienes OBS normal y también el de Flatpak, te pregunta en cuál instalarlos.
+4. Abre OBS, clic derecho en tu micrófono > **Filtros** > **+** y busca los efectos **Streamerdesk ASMR**.
+
+- OBS normal: se instalan en `~/.config/obs-studio/plugins/`.
+- OBS Flatpak: en `~/.var/app/com.obsproject.Studio/config/obs-studio/plugins/`.
+- **Tus presets se conservan siempre** (`…/obs-studio/plugin_config/…/presets.json`): ni el instalador ni el desinstalador los tocan.
+- ¿Quieres añadir o quitar efectos más adelante? Vuelve a ejecutar `./install.sh`, o usa **`./uninstall.sh`**.
+- Sin preguntas: `./install.sh --yes` (todo). Otras opciones: `--flatpak`, `--native`, `--text`, `--help`.
+- Instalación manual: copia las carpetas de `plugins/` dentro de una de las carpetas `plugins/` de arriba.
+
+## Install (English)
+1. Quit OBS Studio and extract this archive.
+2. Open a terminal in the folder and run **`./install.sh`** (or double-click > "Run in terminal"). No `sudo` needed.
+3. Tick the effects you want (**all are selected**; Space toggles) and confirm.
+   If you have both regular OBS and Flatpak OBS, it asks which one to use.
+4. Open OBS, right-click your microphone > **Filters** > **+** and look for the **Streamerdesk ASMR** effects.
+
+- Regular OBS: installed into `~/.config/obs-studio/plugins/`.
+- Flatpak OBS: into `~/.var/app/com.obsproject.Studio/config/obs-studio/plugins/`.
+- **Your presets are always kept** (`…/obs-studio/plugin_config/…/presets.json`); the installer and uninstaller never touch them.
+- Want to add or remove effects later? Run `./install.sh` again, or use **`./uninstall.sh`**.
+- No questions: `./install.sh --yes` (everything). Other options: `--flatpak`, `--native`, `--text`, `--help`.
+- Manual install: copy the folders inside `plugins/` into one of the `plugins/` folders above.
+
+@NOTES@
+
+---
+Licencia / License: GPL-2.0-or-later (LICENSE.txt). Código fuente / Source code: paquetes *source* de cada efecto en https://streamerdesk.com

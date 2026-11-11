@@ -1,0 +1,36 @@
+# Build outputs
+build/
+build-*/
+dist/
+dist-*/
+.deps/
+
+# Binaries and packages
+*.dll
+*.so
+*.dylib
+*.exe
+*.zip
+*.tar.gz
+*.tgz
+*.pkg
+*.7z
+
+# Tooling / temp
+__pycache__/
+*.py[cod]
+*.log
+*.swp
+*~
+.DS_Store
+Thumbs.db
+wine-prefix/
+.wine/
+*.app
+*.plugin
+
+# Editor / IDE
+.idea/
+.vscode/
+*.user
+CMakeUserPresets.json

@@ -1,0 +1,11 @@
+sd_add_obs_plugin(streamerdesk-asmr-binaural-spatializer 1.0.0 src/plugin-main.c src/binaural_dsp.c)
+target_include_directories(streamerdesk-asmr-binaural-spatializer PRIVATE src)
+
+if(SD_BUILD_TESTS)
+  add_executable(test_binaural test/test_binaural.c src/binaural_dsp.c)
+  target_include_directories(test_binaural PRIVATE src common/dsp)
+  if(NOT MSVC)
+    target_link_libraries(test_binaural PRIVATE m)
+  endif()
+  add_test(NAME binaural_dsp COMMAND test_binaural)
+endif()

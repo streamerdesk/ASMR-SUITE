@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# @TITLE@ - desinstalador para OBS Studio en Linux / uninstaller for OBS Studio on Linux
+#
+#   ./uninstall.sh          elige qué quitar / choose what to remove
+#   ./uninstall.sh --yes    quita todo lo instalado, sin preguntas / remove everything installed, no questions
+#   ./uninstall.sh --text   sin ventanas / no dialogs        (--lang=es | --lang=en)
+#
+# Borra solo <config>/obs-studio/plugins/<id>. Tus presets (plugin_config/<id>/presets.json) se conservan.
+# Removes only <config>/obs-studio/plugins/<id>. Your presets (plugin_config/<id>/presets.json) are kept.
+set -u
+@COMMON@
+if [ "${SHOW_HELP:-0}" = 1 ]; then sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'; exit 0; fi
+
+PATHS=(); PLABELS=()
+for base in "$NATIVE_BASE" "$FLATPAK_BASE"; do
+	if [ "$WANT_NATIVE" = 1 ] || [ "$WANT_FLATPAK" = 1 ]; then
+		[ "$base" = "$NATIVE_BASE" ] && [ "$WANT_NATIVE" = 0 ] && continue
+		[ "$base" = "$FLATPAK_BASE" ] && [ "$WANT_FLATPAK" = 0 ] && continue
+	fi
+	where="$(t 'OBS normal' 'regular OBS')"; [ "$base" = "$FLATPAK_BASE" ] && where="OBS Flatpak"
+	for i in "${!IDS[@]}"; do
+		if [ -d "$base/plugins/${IDS[$i]}" ]; then
+			PATHS+=("$base/plugins/${IDS[$i]}"); PLABELS+=("${NAMES[$i]} ($where)")
+		fi
+	done
+done
+if [ ${#PATHS[@]} -eq 0 ]; then
+	info "$(t 'No hay efectos de Streamerdesk ASMR instalados.' 'No Streamerdesk ASMR effects are installed.')"; exit 0
+fi
+if [ ${#PATHS[@]} -eq 1 ] && [ "$YES" = 0 ]; then
+	ask_yes "$(t "¿Desinstalar ${PLABELS[0]}?\n(tus presets se conservan)" "Uninstall ${PLABELS[0]}?\n(your presets are kept)")" || exit 0
+	SEL=0
+else
+	SEL="$(pick "$(t '¿Qué efectos quieres desinstalar? (tus presets se conservan)' 'Which effects would you like to uninstall? (your presets are kept)')" "${PLABELS[@]}")" || exit 0
+fi
+OUT=""
+for i in $SEL; do
+	rm -rf "${PATHS[$i]:?}" && OUT="$OUT\n  • ${PLABELS[$i]}"
+done
+if [ -n "$OUT" ]; then
+	info "$(t 'Desinstalado:' 'Uninstalled:')$OUT\n\n$(t 'Tus presets siguen guardados por si vuelves. 💜' 'Your presets are still saved in case you come back. 💜')"
+else
+	info "$(t 'No se ha desinstalado nada.' 'Nothing was uninstalled.')"
+fi

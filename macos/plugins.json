@@ -1,0 +1,27 @@
+{
+  "suite_version": "1.0.1",
+  "plugins": [
+    {"key": "pingpong-echo", "root": ".", "dir": "plugins/pingpong-echo",
+     "name_es": "Eco Ping-Pong", "name_en": "Ping-Pong Echo",
+     "desc_es": "Eco que rebota de oído a oído.", "desc_en": "Echo that bounces from ear to ear."},
+    {"key": "reverb", "root": ".", "dir": "plugins/reverb",
+     "name_es": "Reverb", "name_en": "Reverb",
+     "desc_es": "Salas suaves y envolventes para tu voz.", "desc_en": "Soft, enveloping rooms for your voice."},
+    {"key": "8d-orbit", "root": ".", "dir": "plugins/8d-orbit",
+     "name_es": "8D / Órbita", "name_en": "8D / Orbit",
+     "desc_es": "La voz gira alrededor de tu cabeza.", "desc_en": "The voice circles around your head."},
+    {"key": "ear-to-ear", "root": ".", "dir": "plugins/ear-to-ear",
+     "name_es": "Susurro de oído a oído", "name_en": "Ear-to-Ear Whisper",
+     "desc_es": "Susurros que viajan de un oído al otro.", "desc_en": "Whispers that travel from one ear to the other."},
+    {"key": "proximity", "root": "plugins/proximity", "dir": ".",
+     "bundle_id": "com.streamerdesk.asmr.proximity",
+     "sources": "src/plugin-main.c src/proximity_dsp.c", "tests": "test/test_proximity.c src/proximity_dsp.c",
+     "name_es": "Proximidad", "name_en": "Proximity",
+     "desc_es": "Acerca o aleja tu voz del oído.", "desc_en": "Brings your voice closer to or farther from the ear."},
+    {"key": "binaural", "root": "plugins/binaural", "dir": ".",
+     "bundle_id": "com.streamerdesk.asmr.binaural-spatializer",
+     "sources": "src/plugin-main.c src/binaural_dsp.c", "tests": "test/test_binaural.c src/binaural_dsp.c",
+     "name_es": "Espacialidad binaural", "name_en": "Binaural Spatializer",
+     "desc_es": "Coloca tu voz en cualquier punto alrededor de la cabeza.", "desc_en": "Places your voice anywhere around the head."}
+  ]
+}

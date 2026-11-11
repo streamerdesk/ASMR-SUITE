@@ -1,0 +1,30 @@
+![Streamerdesk ASMR](banner.jpg)
+
+# @DISPLAY@ @VERSION@ — macOS
+
+**ES** · Filtro de audio para **OBS Studio 28 o posterior** en **macOS 11+**, universal (**Apple Silicon e Intel**). Gratis y de código abierto, hecho con cariño por Streamerdesk — https://streamerdesk.com
+
+**EN** · Audio filter for **OBS Studio 28 or later** on **macOS 11+**, universal (**Apple Silicon and Intel**). Free and open source, lovingly made by Streamerdesk — https://streamerdesk.com
+
+## Instalar (español)
+1. Cierra OBS Studio.
+2. Haz doble clic en **`Instalar - Install.command`** (la primera vez: clic derecho > Abrir, mira abajo).
+3. Abre OBS, clic derecho en tu micrófono > **Filtros** > **+** > **@NAME_ES@**.
+
+Instalación manual: copia `@ID@.plugin` a `~/Library/Application Support/obs-studio/plugins/` (en el Finder: Ir > Ir a la carpeta…).
+Tus presets de usuario viven en `~/Library/Application Support/obs-studio/plugin_config/@ID@/presets.json` y se conservan al actualizar o desinstalar.
+Desinstalar: borra `@ID@.plugin` de esa carpeta de plugins.
+
+## Install (English)
+1. Quit OBS Studio.
+2. Double-click **`Instalar - Install.command`** (first time: right-click > Open, see below).
+3. Open OBS, right-click your microphone > **Filters** > **+** > **@NAME_EN@** (shown with its Spanish/English label).
+
+Manual install: copy `@ID@.plugin` to `~/Library/Application Support/obs-studio/plugins/` (Finder: Go > Go to Folder…).
+Your user presets live in `~/Library/Application Support/obs-studio/plugin_config/@ID@/presets.json` and are kept when updating or uninstalling.
+Uninstall: delete `@ID@.plugin` from that plugins folder.
+
+@GATEKEEPER@
+
+---
+Licencia / License: GPL-2.0-or-later (LICENSE.txt). ¿Quieres los seis efectos? Descarga la *Streamerdesk ASMR Suite* para macOS. / Want all six effects? Get the *Streamerdesk ASMR Suite* for macOS.

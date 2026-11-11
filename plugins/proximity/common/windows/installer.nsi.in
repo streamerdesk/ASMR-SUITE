@@ -1,0 +1,151 @@
+; Streamerdesk ASMR Suite - instalador NSIS comun (generado por scripts/build-all.sh)
+Unicode true
+ManifestDPIAware true
+SetCompressor /SOLID lzma
+!include "MUI2.nsh"
+!include "LogicLib.nsh"
+!include "x64.nsh"
+
+!define PLUGIN_ID "@ID@"
+!define DISPLAY "@DISPLAY@"
+!define VERSION "@VERSION@"
+!define VENDOR "@VENDOR@"
+!define URL "@URL@"
+!define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PLUGIN_ID}"
+
+Name "${DISPLAY} ${VERSION}"
+OutFile "@OUTFILE@"
+InstallDir "$PROGRAMFILES64\obs-studio"
+RequestExecutionLevel admin
+BrandingText "${VENDOR} - ${URL}"
+
+VIProductVersion "${VERSION}.0"
+VIAddVersionKey /LANG=0 "ProductName" "${DISPLAY}"
+VIAddVersionKey /LANG=0 "CompanyName" "${VENDOR}"
+VIAddVersionKey /LANG=0 "FileDescription" "${DISPLAY} - OBS Studio plugin installer"
+VIAddVersionKey /LANG=0 "FileVersion" "${VERSION}"
+VIAddVersionKey /LANG=0 "ProductVersion" "${VERSION}"
+VIAddVersionKey /LANG=0 "LegalCopyright" "(C) 2026 ${VENDOR} - GPL-2.0-or-later"
+
+!define MUI_ICON "@ICON@"
+!define MUI_UNICON "@ICON@"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "@WELCOME_BMP@"
+!define MUI_UNWELCOMEFINISHPAGE_BITMAP "@WELCOME_BMP@"
+!define MUI_HEADERIMAGE
+!define MUI_HEADERIMAGE_BITMAP "@HEADER_BMP@"
+!define MUI_HEADERIMAGE_RIGHT
+!define MUI_ABORTWARNING
+!define MUI_LANGDLL_ALLLANGUAGES
+
+!define MUI_WELCOMEPAGE_TITLE "$(WelcomeTitle)"
+!define MUI_WELCOMEPAGE_TEXT "$(WelcomeText)"
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_LICENSE "@LICENSE@"
+!define MUI_DIRECTORYPAGE_TEXT_TOP "$(DirText)"
+!define MUI_PAGE_CUSTOMFUNCTION_LEAVE DirLeave
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!define MUI_FINISHPAGE_TEXT "$(FinishText)"
+!define MUI_FINISHPAGE_LINK "${URL}"
+!define MUI_FINISHPAGE_LINK_LOCATION "${URL}"
+!insertmacro MUI_PAGE_FINISH
+
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+; Idiomas: el primero es el de reserva; NSIS elige automaticamente el del sistema.
+!insertmacro MUI_LANGUAGE "English"
+!insertmacro MUI_LANGUAGE "Spanish"
+!insertmacro MUI_LANGUAGE "SpanishInternational"
+
+LangString WelcomeTitle ${LANG_ENGLISH} "${DISPLAY} ${VERSION}"
+LangString WelcomeTitle ${LANG_SPANISH} "${DISPLAY} ${VERSION}"
+LangString WelcomeTitle ${LANG_SPANISHINTERNATIONAL} "${DISPLAY} ${VERSION}"
+LangString WelcomeText ${LANG_ENGLISH} "This will install the audio filter $\"${DISPLAY}$\" (Streamerdesk ASMR Suite) into OBS Studio 28 or newer.$\r$\n$\r$\nPlease close OBS Studio before continuing.$\r$\n$\r$\nFree software by ${VENDOR} - ${URL}"
+LangString WelcomeText ${LANG_SPANISH} "Se instalará el filtro de audio «${DISPLAY}» (Streamerdesk ASMR Suite) en OBS Studio 28 o posterior.$\r$\n$\r$\nCierra OBS Studio antes de continuar.$\r$\n$\r$\nSoftware libre de ${VENDOR} - ${URL}"
+LangString WelcomeText ${LANG_SPANISHINTERNATIONAL} "Se instalará el filtro de audio «${DISPLAY}» (Streamerdesk ASMR Suite) en OBS Studio 28 o posterior.$\r$\n$\r$\nCierra OBS Studio antes de continuar.$\r$\n$\r$\nSoftware libre de ${VENDOR} - ${URL}"
+LangString DirText ${LANG_ENGLISH} "Select the OBS Studio installation folder (detected automatically)."
+LangString DirText ${LANG_SPANISH} "Selecciona la carpeta de instalación de OBS Studio (detectada automáticamente)."
+LangString DirText ${LANG_SPANISHINTERNATIONAL} "Selecciona la carpeta de instalación de OBS Studio (detectada automáticamente)."
+LangString NoObs ${LANG_ENGLISH} "OBS Studio was not found in this folder (bin\64bit\obs64.exe is missing).$\r$\nInstall here anyway?"
+LangString NoObs ${LANG_SPANISH} "No se encontró OBS Studio en esta carpeta (falta bin\64bit\obs64.exe).$\r$\n¿Instalar aquí de todos modos?"
+LangString NoObs ${LANG_SPANISHINTERNATIONAL} "No se encontró OBS Studio en esta carpeta (falta bin\64bit\obs64.exe).$\r$\n¿Instalar aquí de todos modos?"
+LangString FinishText ${LANG_ENGLISH} "Done! Open OBS Studio, right-click your microphone in the Audio Mixer > Filters > + > $\"${DISPLAY}$\"."
+LangString FinishText ${LANG_SPANISH} "¡Listo! Abre OBS Studio, clic derecho en tu micrófono en el Mezclador de audio > Filtros > + > «${DISPLAY}»."
+LangString FinishText ${LANG_SPANISHINTERNATIONAL} "¡Listo! Abre OBS Studio, clic derecho en tu micrófono en el Mezclador de audio > Filtros > + > «${DISPLAY}»."
+LangString ObsRunning ${LANG_ENGLISH} "OBS Studio seems to be running. Please close it and press Retry."
+LangString ObsRunning ${LANG_SPANISH} "Parece que OBS Studio está abierto. Ciérralo y pulsa Reintentar."
+LangString ObsRunning ${LANG_SPANISHINTERNATIONAL} "Parece que OBS Studio está abierto. Ciérralo y pulsa Reintentar."
+
+Function .onInit
+  ${If} ${RunningX64}
+    SetRegView 64
+  ${EndIf}
+  ; Carpeta de OBS desde el registro (la escribe el instalador oficial de OBS)
+  ReadRegStr $0 HKLM "SOFTWARE\OBS Studio" ""
+  ${If} $0 == ""
+    ReadRegStr $0 HKCU "SOFTWARE\OBS Studio" ""
+  ${EndIf}
+  ${If} $0 != ""
+    StrCpy $INSTDIR $0
+  ${EndIf}
+FunctionEnd
+
+Function DirLeave
+  ${IfNot} ${FileExists} "$INSTDIR\bin\64bit\obs64.exe"
+    MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(NoObs)" IDYES +2
+    Abort
+  ${EndIf}
+FunctionEnd
+
+Section "Install"
+  ; comprobar que OBS no este en uso (la DLL estaria bloqueada)
+  retry:
+  ClearErrors
+  ${If} ${FileExists} "$INSTDIR\obs-plugins\64bit\${PLUGIN_ID}.dll"
+    FileOpen $1 "$INSTDIR\obs-plugins\64bit\${PLUGIN_ID}.dll" a
+    ${If} ${Errors}
+      MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(ObsRunning)" IDRETRY retry
+      Abort
+    ${EndIf}
+    FileClose $1
+  ${EndIf}
+
+  SetOutPath "$INSTDIR\obs-plugins\64bit"
+  File "@STAGE@\obs-plugins\64bit\${PLUGIN_ID}.dll"
+  SetOutPath "$INSTDIR\data\obs-plugins\${PLUGIN_ID}"
+  File /r "@STAGE@\data\obs-plugins\${PLUGIN_ID}\*.*"
+
+  WriteUninstaller "$INSTDIR\data\obs-plugins\${PLUGIN_ID}\uninstall.exe"
+  WriteRegStr HKLM "${UNINST_KEY}" "DisplayName" "${DISPLAY} (OBS Studio)"
+  WriteRegStr HKLM "${UNINST_KEY}" "DisplayVersion" "${VERSION}"
+  WriteRegStr HKLM "${UNINST_KEY}" "Publisher" "${VENDOR}"
+  WriteRegStr HKLM "${UNINST_KEY}" "URLInfoAbout" "${URL}"
+  WriteRegStr HKLM "${UNINST_KEY}" "HelpLink" "${URL}"
+  WriteRegStr HKLM "${UNINST_KEY}" "InstallLocation" "$INSTDIR"
+  WriteRegStr HKLM "${UNINST_KEY}" "DisplayIcon" "$INSTDIR\data\obs-plugins\${PLUGIN_ID}\icon.ico"
+  WriteRegStr HKLM "${UNINST_KEY}" "UninstallString" "$\"$INSTDIR\data\obs-plugins\${PLUGIN_ID}\uninstall.exe$\""
+  WriteRegDWORD HKLM "${UNINST_KEY}" "NoModify" 1
+  WriteRegDWORD HKLM "${UNINST_KEY}" "NoRepair" 1
+SectionEnd
+
+Function un.onInit
+  ${If} ${RunningX64}
+    SetRegView 64
+  ${EndIf}
+  ; el desinstalador vive en <obs>\data\obs-plugins\<id>\ -> subir 3 niveles
+  ReadRegStr $0 HKLM "${UNINST_KEY}" "InstallLocation"
+  ${If} $0 != ""
+    StrCpy $INSTDIR $0
+  ${Else}
+    GetFullPathName $INSTDIR "$INSTDIR\..\..\.."
+  ${EndIf}
+FunctionEnd
+
+Section "Uninstall"
+  Delete "$INSTDIR\obs-plugins\64bit\${PLUGIN_ID}.dll"
+  Delete "$INSTDIR\obs-plugins\64bit\${PLUGIN_ID}.pdb"
+  RMDir /r "$INSTDIR\data\obs-plugins\${PLUGIN_ID}"
+  DeleteRegKey HKLM "${UNINST_KEY}"
+  ; Los presets de usuario (%APPDATA%\obs-studio\plugin_config\${PLUGIN_ID}) se conservan.
+SectionEnd

@@ -1,0 +1,11 @@
+sd_add_obs_plugin(streamerdesk-asmr-ear-to-ear 1.0.0 src/plugin-main.c src/ear_dsp.c)
+target_include_directories(streamerdesk-asmr-ear-to-ear PRIVATE src)
+
+if(SD_BUILD_TESTS)
+  add_executable(test_ear_to_ear test/test_ear.c src/ear_dsp.c)
+  target_include_directories(test_ear_to_ear PRIVATE src common/dsp)
+  if(NOT MSVC)
+    target_link_libraries(test_ear_to_ear PRIVATE m)
+  endif()
+  add_test(NAME ear_to_ear_dsp COMMAND test_ear_to_ear)
+endif()

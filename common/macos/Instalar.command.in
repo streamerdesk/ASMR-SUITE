@@ -1,0 +1,15 @@
+#!/bin/bash
+# Instalador de @DISPLAY@ para OBS Studio en macOS (doble clic)
+# Installer for @DISPLAY@ on macOS (double-click)
+HERE="$(cd "$(dirname "$0")" && pwd)"
+DEST="$HOME/Library/Application Support/obs-studio/plugins"
+mkdir -p "$DEST"
+rm -rf "$DEST/@ID@.plugin"
+cp -R "$HERE/@ID@.plugin" "$DEST/"
+# quitar la cuarentena de Gatekeeper (plugin no notarizado) / remove Gatekeeper quarantine
+xattr -dr com.apple.quarantine "$DEST/@ID@.plugin" 2>/dev/null
+echo ""
+echo "✅ Instalado en / Installed to: $DEST/@ID@.plugin"
+echo "   Reinicia OBS Studio / Restart OBS Studio."
+echo ""
+read -n 1 -s -r -p "Pulsa una tecla para cerrar / Press any key to close"

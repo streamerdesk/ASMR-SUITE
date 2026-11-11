@@ -1,0 +1,11 @@
+sd_add_obs_plugin(streamerdesk-asmr-reverb 1.0.1 src/plugin-main.c src/reverb_dsp.c)
+target_include_directories(streamerdesk-asmr-reverb PRIVATE src)
+
+if(SD_BUILD_TESTS)
+  add_executable(test_reverb test/test_reverb.c src/reverb_dsp.c)
+  target_link_libraries(test_reverb PRIVATE sd_common)
+  if(NOT MSVC)
+    target_link_libraries(test_reverb PRIVATE m)
+  endif()
+  add_test(NAME reverb_dsp COMMAND test_reverb)
+endif()

@@ -1,0 +1,42 @@
+![Streamerdesk ASMR Suite](banner.jpg)
+
+# Streamerdesk ASMR Suite @SUITE_VERSION@ — macOS
+
+**ES** · Seis filtros de audio para **OBS Studio 28 o posterior** pensados para ASMR, para **macOS 11+** universal (**Apple Silicon e Intel**). Gratis y de código abierto, hecho con cariño por Streamerdesk — https://streamerdesk.com
+
+**EN** · Six audio filters for **OBS Studio 28 or later**, made for ASMR, for **macOS 11+**, universal (**Apple Silicon and Intel**). Free and open source, lovingly made by Streamerdesk — https://streamerdesk.com
+
+| Efecto / Effect | Versión | Módulo / Bundle |
+|---|---|---|
+@TABLE@
+
+## Instalar (español)
+Cierra OBS Studio y elige **una** de estas dos formas:
+
+- **`Instalar - Install.command`** (recomendado): doble clic, marca los efectos que quieras (vienen todos marcados; Cmd-clic para quitar o añadir) y pulsa **Instalar**. Quita la cuarentena de Gatekeeper por ti y no pide contraseña.
+- **`StreamerdeskASMR-Suite-@SUITE_VERSION@-macos.pkg`**: el instalador clásico de macOS. En **Tipo de instalación > Personalizar** eliges los efectos. Pide tu contraseña de administrador porque deja una copia en `/Library/Application Support/Streamerdesk/ASMR/` y la copia a tu usuario.
+
+Después abre OBS, clic derecho en tu micrófono > **Filtros** > **+** y busca los efectos **Streamerdesk ASMR**.
+
+- Los plugins se instalan en `~/Library/Application Support/obs-studio/plugins/`.
+- **Tus presets se conservan siempre** (`~/Library/Application Support/obs-studio/plugin_config/…/presets.json`): ni el instalador ni el desinstalador los tocan.
+- Para quitar efectos: **`Desinstalar - Uninstall.command`**.
+- Instalación manual: copia los `.plugin` de la carpeta `Plugins/` a la carpeta de plugins de arriba.
+
+## Install (English)
+Quit OBS Studio and pick **one** of these:
+
+- **`Instalar - Install.command`** (recommended): double-click, tick the effects you want (all are selected; Cmd-click to add or remove) and click **Install**. It removes the Gatekeeper quarantine for you and needs no password.
+- **`StreamerdeskASMR-Suite-@SUITE_VERSION@-macos.pkg`**: the classic macOS installer. Choose effects under **Installation Type > Customize**. It asks for your admin password because it keeps a copy in `/Library/Application Support/Streamerdesk/ASMR/` and copies it into your user folder.
+
+Then open OBS, right-click your microphone > **Filters** > **+** and look for the **Streamerdesk ASMR** effects.
+
+- Plugins are installed into `~/Library/Application Support/obs-studio/plugins/`.
+- **Your presets are always kept** (`~/Library/Application Support/obs-studio/plugin_config/…/presets.json`); the installer and uninstaller never touch them.
+- To remove effects: **`Desinstalar - Uninstall.command`**.
+- Manual install: copy the `.plugin` bundles from the `Plugins/` folder into the plugins folder above.
+
+@GATEKEEPER@
+
+---
+Licencia / License: GPL-2.0-or-later (LICENSE.txt). Código fuente / Source code: paquetes *source* de cada efecto en https://streamerdesk.com

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Instalador de @DISPLAY@ para OBS Studio en Linux (usuario actual, sin sudo)
+# Installer for @DISPLAY@ on Linux (current user, no sudo needed)
+set -e
+HERE="$(cd "$(dirname "$0")" && pwd)"
+ID="@ID@"
+installed=0
+for base in "$HOME/.config/obs-studio" "$HOME/.var/app/com.obsproject.Studio/config/obs-studio"; do
+	if [ "$base" = "$HOME/.config/obs-studio" ] || [ -d "$base" ]; then
+		mkdir -p "$base/plugins"
+		rm -rf "$base/plugins/$ID"
+		cp -r "$HERE/$ID" "$base/plugins/"
+		echo "Instalado / Installed: $base/plugins/$ID"
+		installed=1
+	fi
+done
+[ "$installed" = 1 ] && echo "Reinicia OBS Studio / Restart OBS Studio."

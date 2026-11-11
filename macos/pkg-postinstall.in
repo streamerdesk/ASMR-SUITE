@@ -1,0 +1,22 @@
+#!/bin/bash
+# postinstall de @DISPLAY@: OBS 28+ en macOS carga plugins de terceros desde la carpeta del USUARIO,
+# asi que copiamos el bundle a ~/Library/Application Support/obs-studio/plugins del usuario con sesion.
+# Los presets (plugin_config) no se tocan.
+ID="@ID@"
+SRC="/Library/Application Support/Streamerdesk/ASMR/$ID.plugin"
+U="$(stat -f%Su /dev/console 2>/dev/null)"
+if [ -z "$U" ] || [ "$U" = "root" ] || [ "$U" = "_mbsetupuser" ]; then U="${USER:-}"; fi
+[ -z "$U" ] || [ "$U" = "root" ] && exit 0
+H="$(dscl . -read "/Users/$U" NFSHomeDirectory 2>/dev/null | awk '{print $2}')"
+[ -d "$H" ] || H="/Users/$U"
+G="$(id -gn "$U" 2>/dev/null || echo staff)"
+BASE="$H/Library/Application Support/obs-studio"
+DEST="$BASE/plugins"
+for d in "$H/Library/Application Support" "$BASE" "$DEST"; do
+	if [ ! -d "$d" ]; then mkdir -p "$d" && chown "$U:$G" "$d"; fi
+done
+rm -rf "$DEST/$ID.plugin"
+cp -R "$SRC" "$DEST/"
+chown -R "$U:$G" "$DEST/$ID.plugin"
+xattr -dr com.apple.quarantine "$DEST/$ID.plugin" 2>/dev/null
+exit 0
